@@ -14,4 +14,4 @@ class Bishop(Piece):
 
     # initial bishop
     def __init__(self, color, pos):
-        super().__init__(color, pos, "bishop")
+        super().__init__(color, pos, "bishop", f"{color[0]}B")

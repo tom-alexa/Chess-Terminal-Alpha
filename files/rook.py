@@ -14,4 +14,4 @@ class Rook(Piece):
 
     # initial rook
     def __init__(self, color, pos):
-        super().__init__(color, pos, "rook")
+        super().__init__(color, pos, "rook", f"{color[0]}R")

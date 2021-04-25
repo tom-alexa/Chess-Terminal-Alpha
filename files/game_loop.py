@@ -20,11 +20,14 @@ def game_loop():
         game_data = get_starting_data()  # return dictionary
 
         # game object
-        game = Game(game_data["number of players"], game_data["difficulty"], game_data["names"])
+        game = Game(game_data["number of players"], game_data["difficulty"], game_data["names"], game_data["player color"])
         game.play()
 
         # game conclusion (who wins etc.)
         game_ending()
+
+        # ask if user want to play again
+        running = play_again()
 
 
 ############
@@ -36,9 +39,10 @@ def get_starting_data():
 
     # creating data dictionary
     game_data = {}
-    game_data["number of players"] = None
+    game_data["number of players"] = 1
     game_data["difficulty"] = None
     game_data["names"] = None
+    game_data["player color"] = "white"
 
     return game_data
 
@@ -46,3 +50,9 @@ def get_starting_data():
 # game conclusion
 def game_ending():
     pass
+
+
+# ask if user want to play again
+def play_again():
+
+    return False

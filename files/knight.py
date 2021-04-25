@@ -14,4 +14,4 @@ class Knight(Piece):
 
     # initial knight
     def __init__(self, color, pos):
-        super().__init__(color, pos, "knight")
+        super().__init__(color, pos, "knight", f"{color[0]}N")

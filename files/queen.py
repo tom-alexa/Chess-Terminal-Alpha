@@ -14,4 +14,4 @@ class Queen(Piece):
 
     # initial queen
     def __init__(self, color, pos):
-        super().__init__(color, pos, "queen")
+        super().__init__(color, pos, "queen", f"{color[0]}Q")

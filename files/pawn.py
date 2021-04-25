@@ -14,4 +14,4 @@ class Pawn(Piece):
 
     # initial pawn
     def __init__(self, color, pos):
-        super().__init__(color, pos, "pawn")
+        super().__init__(color, pos, "pawn", f"{color[0]}P")
