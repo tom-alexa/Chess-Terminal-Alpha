@@ -1,5 +1,5 @@
 
-# Chess in terminal | main.py ➔ game_loop.py
+# Chess in terminal | main ➔ game_loop
 
 # imports
 from files.game import Game

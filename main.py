@@ -1,11 +1,19 @@
 
-# Chess in terminal | main.py
+# Chess in terminal | main
 # Author: Tom Alexa
 
 # You can play game chess in terminal
 
 # imports
 from files.game_loop import game_loop
+
+
+# structure | main ➔ game_loop ➔ game ➔  king  ➔ piece
+#                                       🢆 queen 🢅
+#                                       🢆 rook  🢅
+#                                       🢆 bishop🢅
+#                                       🢆 knight🢅
+#                                       🢆 pawn  🢅
 
 
 ############
