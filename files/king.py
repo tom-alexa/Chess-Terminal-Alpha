@@ -14,4 +14,11 @@ class King(Piece):
 
     # initial king
     def __init__(self, color, pos):
-        super().__init__(color, pos, "king", f"{color[0]}K")
+        self.short = {1: "", 2: " --- ", 3: "- - -", 4: "-----", 5:""}
+        super().__init__(color, pos, "king")
+
+
+    # get possible moves
+    def get_possible_moves(self, board, pieces, dimensions, real=True):
+
+        return True

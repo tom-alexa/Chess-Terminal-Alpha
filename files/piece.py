@@ -10,11 +10,13 @@
 class Piece():
 
     # initial piece
-    def __init__(self, color, pos, description, short):
+    def __init__(self, color, pos, description):
 
         # parameters
         self.color = color
         self.pos = pos
         self.description = description
-        self.short = short
 
+    def check_if_valid(self, board):
+
+        return True

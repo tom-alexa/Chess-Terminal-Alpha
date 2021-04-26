@@ -14,4 +14,11 @@ class Pawn(Piece):
 
     # initial pawn
     def __init__(self, color, pos):
-        super().__init__(color, pos, "pawn", f"{color[0]}P")
+        self.short = {1: "", 2: "", 3: "  -  ", 4: " --- ", 5:""}
+        super().__init__(color, pos, "pawn")
+
+
+    # get possible moves
+    def get_possible_moves(self, board, get_dimensions):
+
+        pass
