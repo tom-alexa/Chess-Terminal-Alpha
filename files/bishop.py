@@ -19,14 +19,21 @@ class Bishop(Piece):
 
 
     # get possible moves
-    def get_possible_moves(self, board, dimensions, move_number, turn, game_data, game, real):
+    def get_possible_moves(self, board, dimensions):
 
         possible_moves = {"from": self.pos, "to": set()}
         for pos in board:
-            if ( pos[0] - pos[1] == self.pos[0] - self.pos[1] ) or ( (dimensions[0] - pos[0]) - pos[1] == (dimensions[0] - self.pos[0]) - self.pos[1] ):
-                if pos != self.pos:
-                    valid = self.check_if_valid(board, move_number, turn, game_data, game, real, pos)
+            if pos != self.pos:
+                if ( pos[0] - pos[1] == self.pos[0] - self.pos[1] ) or ( (dimensions[0] - pos[0]) - pos[1] == (dimensions[0] - self.pos[0]) - self.pos[1] ):
+                    valid = self.is_valid(board, pos)
                     if valid:
                         possible_moves["to"].add(pos)
 
         return possible_moves
+
+
+    # is it a valid move
+    def is_valid(self, board, pos):
+
+        valid = self.check_diagonal(board, pos)
+        return valid

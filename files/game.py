@@ -126,7 +126,7 @@ class Game():
             self.game_data, self.move_number, self.turn = self.make_move(self.game_data, self.move_number, move, self.turn)
 
 
-            # check if game is finished and get all possible moves
+            # check if game is finished
             possible_moves = True
             if not possible_moves:
                 playing = False
@@ -181,6 +181,10 @@ class Game():
         # special
         move["castling"] = False
         move["en passant"] = False
+
+        if active_piece.description == "pawn":
+            active_piece.first_move = False
+
         if move["castling"]:
             pass
 
@@ -207,7 +211,7 @@ class Game():
         board = self.get_data_at_move(game_data, move_number, turn)["board"]
         pieces = self.get_pieces(board)[color]
         for piece in pieces:
-            moves = piece.get_possible_moves(board, self.dimensions, move_number, turn, game_data, self, real)
+            moves = piece.get_possible_moves(board, self.dimensions)
             possible_moves[moves["from"]] = moves["to"]
 
         return possible_moves
