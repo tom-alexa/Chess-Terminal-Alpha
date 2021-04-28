@@ -19,13 +19,13 @@ class Knight(Piece):
 
 
     # get possible moves
-    def get_possible_moves(self, board, dimensions):
+    def get_possible_moves(self, game_data, move_number, board, turn, dimensions, make_move, get_data_at_move, is_check, real=True):
 
         possible_moves = {"from": self.pos, "to": set()}
         for pos in board:
             if pos != self.pos:
                 if ( (pos[0] - 1 == self.pos[0] or pos[0] + 1 == self.pos[0]) and (pos[1] - 2 == self.pos[1] or pos[1] + 2 == self.pos[1]) ) or ( (pos[0] - 2 == self.pos[0] or pos[0] + 2 == self.pos[0]) and (pos[1] - 1 == self.pos[1] or pos[1] + 1 == self.pos[1]) ):
-                    valid = self.is_valid(board, pos)
+                    valid = self.is_valid(game_data, move_number, board, turn, make_move, get_data_at_move, is_check, pos, real)
                     if valid:
                         possible_moves["to"].add(pos)
 
@@ -33,10 +33,15 @@ class Knight(Piece):
 
 
     # is it a valid move
-    def is_valid(self, board, pos):
+    def is_valid(self, game_data, move_number, board, turn, make_move, get_data_at_move, is_check, pos, real):
 
         if board[pos]:
             if board[pos].color == self.color:
                 return False
 
-        return True
+        if real:
+            valid = self.check_if_valid(game_data, move_number, board, turn, make_move, get_data_at_move, is_check, pos)
+        else:
+            valid = False
+
+        return valid

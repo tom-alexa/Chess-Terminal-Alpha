@@ -21,25 +21,15 @@ class Piece():
         self.description = description
 
 
-    def check_if_valid(self, board, move_number, turn, game_data, game, real, move):
+    # function tells you if king is in check position, therefore it is forbidden
+    def check_if_valid(self, game_data, move_number, board, turn, make_move, get_data_at_move, is_check, move):
 
-        valid = True
-        if real:
-            pass
-            # valid = self.check_if_not_check(board, move_number, turn, game_data, game, move)
-        new_game_data, new_move_number, new_turn = game.make_move(copy.deepcopy(game_data), move_number, move, turn)
-        poss_moves = game.get_all_possible_moves(new_game_data, new_move_number, new_turn, real=False)
+        copy_data = copy.deepcopy(game_data)
+        mod_move = {"pos": {"from": self.pos, "to": move} }
+        mod_board = get_data_at_move(copy_data, move_number, turn)["board"]
+        data, move_number, turn = make_move(copy_data, move_number, mod_move, turn)
 
-        pieces = game.get_pieces(game.get_data_at_move(new_game_data, new_move_number, new_turn)["board"])[self.color]
-        for piece in pieces:
-            if piece.description == "king":
-                king = piece
-                break
-
-        for m in poss_moves:
-            if m == king.pos:
-                return False
-
+        valid = not (is_check(data, move_number, get_data_at_move(data, move_number, turn )["board"], turn, attack=False) )
 
         return valid
 

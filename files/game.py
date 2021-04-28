@@ -127,8 +127,9 @@ class Game():
 
 
             # check if game is finished
-            possible_moves = True
-            if not possible_moves:
+            mate = self.checkmate(self.game_data, self.move_number, self.get_data_at_move(self.game_data, self.move_number, self.turn)["board"], self.turn)
+            if mate:
+                terminal_board(self.get_data_at_move(self.game_data, self.move_number, self.turn)["board"], self.dimensions, self.colors)
                 playing = False
 
 
@@ -143,7 +144,7 @@ class Game():
         if self.number_of_players == 2:
             move = self.player_move()
         elif self.number_of_players == 1:
-            if (self.change_turn(self.turn) > 0 and self.player_color == "white") or (self.change_turn(self.turn) < 0 and self.player_color == "black"):
+            if ( (self.turn * -1) > 0 and self.player_color == "white") or ( (self.turn * -1) < 0 and self.player_color == "black"):
                 move = self.player_move()
             else:
                 move = self.computer_move()
@@ -160,7 +161,7 @@ class Game():
         board = copy.deepcopy(self.get_data_at_move(game_data, move_number, turn)["board"])
 
         # change turn
-        turn = self.change_turn(turn)
+        turn *= -1
 
         # update move number and turn
         if turn > 0:
@@ -211,7 +212,7 @@ class Game():
         board = self.get_data_at_move(game_data, move_number, turn)["board"]
         pieces = self.get_pieces(board)[color]
         for piece in pieces:
-            moves = piece.get_possible_moves(board, self.dimensions)
+            moves = piece.get_possible_moves(game_data, move_number, board, turn, self.dimensions, self.make_move, self.get_data_at_move, self.is_check)
             possible_moves[moves["from"]] = moves["to"]
 
         return possible_moves
@@ -255,12 +256,6 @@ class Game():
         return move
 
 
-    # change turn after each move
-    def change_turn(self, turn):
-        turn *= -1
-        return turn
-
-
     ###################
     #  get something  #
     ###################
@@ -302,7 +297,7 @@ class Game():
         
         if turn > 1:
             move_number -= 1
-        turn = self.change_turn(turn)
+        turn *= -1
 
         return move_number, turn
 
@@ -312,3 +307,40 @@ class Game():
 
     def enpassant(self):
         pass
+
+
+    ###########
+    #  check  #
+    ###########
+
+    # detect check
+    def is_check(self, game_data, move_number, board, turn, attack=True):
+
+        clr = "white" if turn > 0 else "black"
+        opp_clr = "white" if turn < 0 else "black"
+
+
+        pieces = self.get_pieces(board)
+
+        king_color = opp_clr if attack else clr
+        for piece in pieces[king_color]:
+            if piece.description == "king":
+                king_pos = piece.pos
+                break
+
+        pieces_clr = clr if attack else opp_clr
+        for piece in pieces[pieces_clr]:
+            moves = piece.get_possible_moves(game_data, move_number, board, turn, self.dimensions, self.make_move, self.get_data_at_move, self.is_check, real=False)
+            for move in moves["to"]:
+                if move == king_pos:
+                    return True
+
+        return False
+
+
+    def checkmate(self, game_data, move_number, board, turn):
+
+
+        check = self.is_check(game_data, move_number, board, turn)
+
+        return check
