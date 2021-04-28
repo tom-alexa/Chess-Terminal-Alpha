@@ -9,6 +9,8 @@ from files.bishop import Bishop
 from files.knight import Knight
 from files.pawn import Pawn
 from files.terminal import terminal_board
+from files.user_input import user_input
+import copy
 
 
 #################
@@ -28,12 +30,11 @@ class Game():
         self.player_color = player_color
 
         # variables
-        self.dimensions = (8, 8)        # (rows, columns)
-        self.playing = True
-        self.board, self.string_board = self.create_board()   # return dictionary { (pos): object that is on pos}
-        self.pieces = self.create_pieces()                    # return dictionary { color: {pieces} }
-        self.turn = 1
-        self.possible_moves = set()
+        self.dimensions = (8, 8)            # (rows, columns)
+        self.move_number = 0
+        start_board = self.create_board()
+        self.game_data = {self.move_number: {"board": start_board } }
+        self.turn = -1
 
         # colors
         self.colors = self.board_colors()
@@ -48,17 +49,14 @@ class Game():
             for column in range(1, self.dimensions[1]+1):
                 board[(row, column)] = None
 
-        string_board = ""
-        return board, string_board
+        board = self.create_pieces(board)
+
+        return board
 
 
     # create pieces
-    def create_pieces(self):
+    def create_pieces(self, board):
         
-        # create dictionary
-        pieces = {"white": set(), "black": set()}
-
-        # both colors
         for color in ["white", "black"]:
 
             # pieces
@@ -67,36 +65,36 @@ class Game():
             # king
             column = 5
             king = King(color, (row, column))
-            pieces[color].add(king)
+            board[(row, column)] = king
 
             # queen
             column = 4
             queen = Queen(color, (row, column))
-            pieces[color].add(queen)
+            board[(row, column)] = queen
 
             # rook
             for column in [1, 8]:
                 rook = Rook(color, (row, column))
-                pieces[color].add(rook)
+                board[(row, column)] = rook
+
 
             # knight
             for column in [2, 7]:
                 knight = Knight(color, (row, column))
-                pieces[color].add(knight)
+                board[(row, column)] = knight
 
             # bishop
             for column in [3, 6]:
                 bishop = Bishop(color, (row, column))
-                pieces[color].add(bishop)
+                board[(row, column)] = bishop
 
             # pawn
             row = 2 if color == "white" else 7
             for column in range(1, self.dimensions[0]+1):
                 pawn = Pawn(color, (row, column))
-                pieces[color].add(pawn)
+                board[(row, column)] = pawn
 
-        self.board = self.update_board(self.board, pieces)
-        return pieces
+        return board
 
 
     def board_colors(self):
@@ -117,20 +115,21 @@ class Game():
     # play (this is where actual game is happening)
     def play(self):
 
-        # all get possible moves
-        # self.possible_moves = self.get_possible_moves(self.board, self.pieces, self.turn)
-
         # running while game is launched
-        while self.playing:
-            terminal_board(self.board, self.dimensions, self.colors)
+        playing = True
+        while playing:
+
+            terminal_board(self.get_data_at_move(self.game_data, self.move_number, self.turn)["board"], self.dimensions, self.colors)
+
             # move
             move = self.get_move()
-            self.board, self.turn = self.make_move(self.board, self.pieces, move, self.turn)
+            self.game_data, self.move_number, self.turn = self.make_move(self.game_data, self.move_number, move, self.turn)
+
 
             # check if game is finished and get all possible moves
-            self.possible_moves = None
-            if not self.possible_moves:
-                self.playing = False
+            possible_moves = True
+            if not possible_moves:
+                playing = False
 
 
     ############
@@ -144,7 +143,7 @@ class Game():
         if self.number_of_players == 2:
             move = self.player_move()
         elif self.number_of_players == 1:
-            if (self.turn > 0 and self.player_color == "white") or (self.turn < 0 and self.player_color == "black"):
+            if (self.change_turn(self.turn) > 0 and self.player_color == "white") or (self.change_turn(self.turn) < 0 and self.player_color == "black"):
                 move = self.player_move()
             else:
                 move = self.computer_move()
@@ -155,26 +154,61 @@ class Game():
 
 
     # make move
-    def make_move(self, board, pieces, move, turn):
+    def make_move(self, game_data, move_number, move, turn):
 
+        # get current board
+        board = copy.deepcopy(self.get_data_at_move(game_data, move_number, turn)["board"])
 
+        # change turn
         turn = self.change_turn(turn)
 
-        return board, turn
+        # update move number and turn
+        if turn > 0:
+            move_number += 1
+
+        # position
+        from_pos = move["pos"]["from"]
+        to_pos = move["pos"]["to"]
+
+        # piece
+        active_piece = board[from_pos]
+
+        # make move
+        board[from_pos] = None
+        board[to_pos] = active_piece
+        active_piece.pos = to_pos
+
+        # special
+        move["castling"] = False
+        move["en passant"] = False
+        if move["castling"]:
+            pass
+
+        if move["en passant"]:
+            pass
+
+        # update data
+        if turn > 0:
+            game_data[move_number] = {turn: {"board": board} }
+        else:
+            game_data[move_number][turn] = {"board": board}
+
+
+        return game_data, move_number, turn
 
 
     # get possible moves
-    def get_possible_moves(self, board, pieces, turn):
+    def get_all_possible_moves(self, game_data, move_number, turn, real=True):
 
         # moves that can only be played by player on the turn
-        color = "white" if turn > 0 else "black"
+        color = "white" if turn < 0 else "black"
 
-        possible_moves = set()
-        for piece in pieces[color]:
-            moves = piece.get_possible_moves(board, pieces, self.dimensions)
-            possible_moves.update(moves)
-
-
+        possible_moves = {}
+        board = self.get_data_at_move(game_data, move_number, turn)["board"]
+        pieces = self.get_pieces(board)[color]
+        for piece in pieces:
+            moves = piece.get_possible_moves(board, self.dimensions, move_number, turn, game_data, self, real)
+            possible_moves[moves["from"]] = moves["to"]
 
         return possible_moves
 
@@ -186,15 +220,34 @@ class Game():
     # player move
     def player_move(self):
 
-        move = "a"
-        input()
+        while True:
+            move = {}
+            move_input = user_input("move")
+            move["pos"] = {}
+            move["pos"]["from"] = self.get_pos(move_input[:2])
+            move["pos"]["to"] = self.get_pos(move_input[2:])
+
+            valid = False
+            poss_moves = self.get_all_possible_moves(self.game_data, self.move_number, self.turn)
+            for poss_move_from in poss_moves:
+                if valid:
+                    break
+                if move["pos"]["from"] == poss_move_from:
+                    for poss_move_to in poss_moves[poss_move_from]:
+                        if move["pos"]["to"] == poss_move_to:
+                            valid = True
+                            break
+
+            if valid:
+                break
+        
         return move
 
 
     # computer move
     def computer_move(self):
-        move = "ahaa"
-        print(self.turn)
+
+        move = self.player_move()
         return move
 
 
@@ -204,21 +257,54 @@ class Game():
         return turn
 
 
+    ###################
+    #  get something  #
+    ###################
+
+    # function return all pieces which are in the given color
+    def get_pieces(self, board):
+
+        pieces = {"white": set(), "black": set()}
+        for pos in board:
+            if board[pos]:
+                piece = board[pos]
+                clr = piece.color
+                pieces[clr].add(piece)
+
+        return pieces
 
 
+    # get game data at the exact moment board
+    def get_data_at_move(self, game_data, move_number, turn):
+
+        if move_number < 1:
+            data = game_data[move_number]
+        else:
+            data = game_data[move_number][turn]
+
+        return data
 
 
-    ############
-    #  update  #
-    ############
+    # function return position in format (row, column) form format (letter(column), row(string))
+    def get_pos(self, string):
 
-    # update board
-    def update_board(self, board, pieces):
+        column = int( ord(string[0].upper() ) ) - 64
+        row = int(string[1])
+
+        return (row, column)
+
+
+    def get_move_before(self, move_number, turn):
         
-        # check each piece
-        for color in ["white", "black"]:
-            for piece in pieces[color]:
-                pos = piece.pos
-                board[pos] = piece
+        if turn > 1:
+            move_number -= 1
+        turn = self.change_turn(turn)
 
-        return board
+        return move_number, turn
+
+
+    def get_castling(self):
+        pass
+
+    def enpassant(self):
+        pass

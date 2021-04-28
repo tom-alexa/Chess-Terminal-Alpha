@@ -3,7 +3,7 @@
 # Chess in terminal | main ➔ game_loop ➔ terminal
 #                   | main ➔ game_loop ➔ game ➔ terminal
 
-# Basically you call what you what to print in terminal.
+# Basically you call what you want to print in terminal.
 
 # imports
 import os
@@ -27,19 +27,19 @@ BLANK_LINE = "\n"
 def terminal_board(board, dimensions, colors):
 
     #####################
-    #  marks (numbers)  #
+    #  marks (letters)  #
     #####################
 
-    def add_numbers(string):
+    def add_letters(string):
 
         line = {1: "", 2: "", 3: "", 4: "", 5:""}
         for i in line:
             for column in range(dimensions[1]+1):
                 if column < 1:
-                    line[i] += (" " * 15)
+                    line[i] += (" " * 19)
 
                 else:
-                    desc = numbers[column][i]
+                    desc = letters[column][i]
                     bg = RESET
 
                     if desc:
@@ -62,7 +62,6 @@ def terminal_board(board, dimensions, colors):
         return string
     
 
-    dashes = "-" * (3 * dimensions[1])
     string_board = BLANK_LINE
 
     pl_1_col = get_ascii_color(colors["pl_1"])
@@ -74,23 +73,23 @@ def terminal_board(board, dimensions, colors):
     letters = create_letters(dimensions[1])
 
 
-    string_board = add_numbers(string_board)
+    string_board = add_letters(string_board)
 
     for row in range(dimensions[0], 0, -1):
         line = {1: "", 2: "", 3: "", 4: "", 5:""}
 
         for i in line:
-            string_board += (" " * 4)
+            string_board += (" " * 10)
 
             for column in range(dimensions[1]+2):
 
 
                 #####################
-                #  marks (letters)  #
+                #  marks (numbers)  #
                 #####################
 
                 if column < 1 or column > dimensions[1]:
-                    desc = letters[row][i]
+                    desc = numbers[row][i]
                     bg = RESET
 
                     if desc:
@@ -109,7 +108,7 @@ def terminal_board(board, dimensions, colors):
                             line[i] = square_symbol(line[i], bg, " ")
 
                     else:
-                        for _ in range(11):
+                        for _ in range(9):
                             line[i] = square_symbol(line[i], bg, " ")
 
 
@@ -149,7 +148,7 @@ def terminal_board(board, dimensions, colors):
 
             string_board += line[i] + RESET + BLANK_LINE
 
-    string_board = add_numbers(string_board)
+    string_board = add_letters(string_board)
 
 
     # print board on the screen
@@ -198,14 +197,14 @@ def get_ascii_color(color, backgound=False):
 def create_letters(rows):
 
     letters = {}
-    letters[1] = {1: "", 2: " ║   ║ ", 3: " ║───╢ ", 4: " ║   ║ ", 5: ""}
-    letters[2] = {1: "", 2: " ╓───┐ ", 3: " ║  ─┐ ", 4: " ╙───┘ ", 5: ""}
-    letters[3] = {1: "", 2: " ╓───  ", 3: " ║───  ", 4: " ║     ", 5: ""}
-    letters[4] = {1: "", 2: " ╓───  ", 3: " ║───  ", 4: " ╙───  ", 5: ""}
-    letters[5] = {1: "", 2: " ╓───┐ ", 3: " ║   │ ", 4: " ╙───┘ ", 5: ""}
-    letters[6] = {1: "", 2: " ╓───  ", 3: " ║     ", 4: " ╙───  ", 5: ""}
-    letters[7] = {1: "", 2: " ╓───┐ ", 3: " ║───┤ ", 4: " ╙───┘ ", 5: ""}
-    letters[8] = {1: "", 2: "  ┌─┐  ", 3: " ┌┴─┴┐ ", 4: " │   │ ", 5: ""}
+    letters[1] = {1: "", 2: " ┌─┐ ", 3: "┌┴─┴┐", 4: "┴   ┴", 5: ""}
+    letters[2] = {1: "", 2: "╓───┐", 3: "║───┤", 4: "╙───┘", 5: ""}
+    letters[3] = {1: "", 2: "╓─── ", 3: "║    ", 4: "╙─── ", 5: ""}
+    letters[4] = {1: "", 2: "╓───┐", 3: "║   │", 4: "╙───┘", 5: ""}
+    letters[5] = {1: "", 2: "╓─── ", 3: "║─── ", 4: "╙─── ", 5: ""}
+    letters[6] = {1: "", 2: "╓─── ", 3: "║─── ", 4: "╩    ", 5: ""}
+    letters[7] = {1: "", 2: "╓───┐", 3: "║  ─┐", 4: "╙───┘", 5: ""}
+    letters[8] = {1: "", 2: "╦   ╦", 3: "║───╢", 4: "╩   ╩", 5: ""}
 
     return letters
 
