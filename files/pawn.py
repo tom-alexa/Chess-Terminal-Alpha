@@ -37,12 +37,15 @@ class Pawn(Piece):
 
 
     # is it a valid move
-    def is_valid(self, game_data, move_number, board, turn, make_move, get_data_at_move, is_check, pos, real):
+    def is_valid(self, game_data, move_number, board, turn, make_move, get_data_at_move, is_check, pos, real, last_move=None):
+
+        if move_number > 0:
+            last_move = get_data_at_move(game_data, move_number, turn)["last move"]["pos"]
 
         if pos[1] == self.pos[1]:
             valid = self.check_row_column(board, pos, pawn=True)
         else:
-            valid = self.check_diagonal(board, pos, pawn=True)
+            valid = self.check_diagonal(board, pos, pawn=True, last_move=last_move)
 
         if valid and real:
             valid = self.check_if_valid(game_data, move_number, board, turn, make_move, get_data_at_move, is_check, pos)

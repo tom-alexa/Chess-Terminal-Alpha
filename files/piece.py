@@ -71,7 +71,7 @@ class Piece():
 
 
     # check column
-    def check_diagonal(self, board, pos, pawn=False):
+    def check_diagonal(self, board, pos, pawn=False, last_move=None):
 
         if pos[0] - pos[1] == self.pos[0] - self.pos[1]:
             change_meta = 1
@@ -97,6 +97,13 @@ class Piece():
                     if check_pos != pos:
                         return False
             elif pawn:
-                return False
+                mod = 1 if self.color == "white" else -1
+                if last_move:
+                    if (board[last_move["to"]].description == "pawn") and ( (last_move["to"][0] + (1 * mod), last_move["to"][1] ) == pos):
+                        return True
+                    else:
+                        return False
+                else:
+                    return False
 
         return True

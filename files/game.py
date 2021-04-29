@@ -160,7 +160,8 @@ class Game():
     def make_move(self, game_data, move_number, move, turn):
 
         # get current board
-        board = copy.deepcopy(self.get_data_at_move(game_data, move_number, turn)["board"])
+        current_data = copy.deepcopy(self.get_data_at_move(game_data, move_number, turn))
+        board = current_data["board"]
 
         # change turn
         turn *= -1
@@ -175,6 +176,14 @@ class Game():
 
         # piece
         active_piece = board[from_pos]
+
+        # en passant
+        if (move_number > 1) or (turn < 0):
+            if board[from_pos].description == "pawn":
+                if board[(from_pos[0], to_pos[1])] == board[current_data["last move"]["pos"]["to"]]:
+                    if board[current_data["last move"]["pos"]["to"]].description == "pawn":
+                        board[current_data["last move"]["pos"]["to"]] = None
+
 
         # make move
         board[from_pos] = None
