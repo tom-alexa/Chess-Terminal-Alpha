@@ -17,7 +17,6 @@ class King(Piece):
         super().__init__(color, pos, "king")
 
         self.short = {1: "", 2: " --- ", 3: "- - -", 4: "-----", 5:""}
-        self.castling = {"big": True, "small": True}
 
 
     # get possible moves

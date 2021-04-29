@@ -6,6 +6,8 @@
 
 # imports
 from files.game_loop import game_loop
+from files.terminal import main_terminal
+from files.user_input import user_input
 
 
 # structure | main ➔ game_loop ➔ game ➔  king  ➔ piece
@@ -22,12 +24,20 @@ from files.game_loop import game_loop
 
 # introduction
 def introduction():
-    pass
+    main_terminal("introduction", operating_system=None)
+
+
+# get operating system
+def operating_system():
+    while True:
+        op_sys = user_input("operating system")
+        if op_sys != "unknown" and op_sys != "no command":
+            return op_sys
 
 
 # ending
 def ending():
-    pass
+    main_terminal("ending")
 
 
 ##########
@@ -38,7 +48,8 @@ def ending():
 def main():
 
     introduction()
-    game_loop()
+    op_sys = operating_system()
+    game_loop(op_sys)
     ending()
 
 

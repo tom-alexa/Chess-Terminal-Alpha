@@ -10,7 +10,7 @@ from files.game import Game
 ###############
 
 # game loop
-def game_loop():
+def game_loop(op_sys):
     
     # running in while loop, if game is finished ask for another one
     running = True
@@ -20,7 +20,7 @@ def game_loop():
         game_data = get_starting_data()  # return dictionary
 
         # game object
-        game = Game(game_data["number of players"], game_data["difficulty"], game_data["names"], game_data["player color"])
+        game = Game(game_data["number of players"], game_data["difficulty"], game_data["names"], game_data["player color"], op_sys)
         game.play()
 
         # game conclusion (who wins etc.)

@@ -8,7 +8,7 @@ from files.rook import Rook
 from files.bishop import Bishop
 from files.knight import Knight
 from files.pawn import Pawn
-from files.terminal import terminal_board
+from files.terminal import main_terminal
 from files.user_input import user_input
 import copy
 
@@ -21,19 +21,20 @@ import copy
 class Game():
 
     # initial game
-    def __init__(self, number_of_players, difficulty, names, player_color):
+    def __init__(self, number_of_players, difficulty, names, player_color, op_sys):
 
         # parameters
         self.number_of_players = number_of_players
         self.difficulty = difficulty
         self.names = names
         self.player_color = player_color
+        self.operating_system = op_sys
 
         # variables
         self.dimensions = (8, 8)            # (rows, columns)
         self.move_number = 0
         start_board = self.create_board()
-        self.game_data = {self.move_number: {"board": start_board } }
+        self.game_data = {self.move_number: {"board": start_board, "castling": {1: {"big": True, "small": True}, -1: {"big": True, "small": True} }, "check": {1: False, -1: False}, "checkmate": {1: False, -1: False}, "last pawn": self.move_number } }
         self.turn = -1
 
         # colors
@@ -119,17 +120,14 @@ class Game():
         playing = True
         while playing:
 
-            terminal_board(self.get_data_at_move(self.game_data, self.move_number, self.turn)["board"], self.dimensions, self.colors)
-
             # move
             move = self.get_move()
             self.game_data, self.move_number, self.turn = self.make_move(self.game_data, self.move_number, move, self.turn)
 
-
             # check if game is finished
-            mate = self.checkmate(self.game_data, self.move_number, self.get_data_at_move(self.game_data, self.move_number, self.turn)["board"], self.turn)
+            last_data = self.get_data_at_move(self.game_data, self.move_number, self.turn)
+            mate = self.get_data_at_move(self.game_data, self.move_number, self.turn)["checkmate"][self.turn*-1]
             if mate:
-                terminal_board(self.get_data_at_move(self.game_data, self.move_number, self.turn)["board"], self.dimensions, self.colors)
                 playing = False
 
 
@@ -139,6 +137,10 @@ class Game():
 
     # get move
     def get_move(self):
+
+        # print board
+        current_data = self.get_data_at_move(self.game_data, self.move_number, self.turn)
+        main_terminal("move", operating_system=self.operating_system, current_data=current_data, move_number=self.move_number, turn=self.turn, dimensions=self.dimensions, colors=self.colors)
 
         # choose who will do the move
         if self.number_of_players == 2:
@@ -179,24 +181,54 @@ class Game():
         board[to_pos] = active_piece
         active_piece.pos = to_pos
 
-        # special
-        move["castling"] = False
-        move["en passant"] = False
-
-        if active_piece.description == "pawn":
-            active_piece.first_move = False
-
-        if move["castling"]:
-            pass
-
-        if move["en passant"]:
-            pass
 
         # update data
         if turn > 0:
             game_data[move_number] = {turn: {"board": board} }
         else:
             game_data[move_number][turn] = {"board": board}
+
+        # last move
+        game_data[move_number][turn]["last move"] = move
+
+
+        #############
+        #  special  #
+        #############
+
+        # last pawn move
+        if active_piece.description == "pawn":
+            active_piece.first_move = False
+            game_data[move_number][turn]["last pawn"] = move_number
+        else:
+            before = self.get_move_before(move_number, turn)
+            game_data[move_number][turn]["last pawn"] = self.get_data_at_move(game_data, before[0], before[1])["last pawn"]
+
+
+        # castling
+        if active_piece.description == "king" or active_piece == "rook":
+            m_num_bef, turn_bef = self.get_move_before(move_number, turn)
+            game_data[move_number][turn]["castling"] =  copy.deepcopy(self.get_data_at_move(game_data, m_num_bef, turn_bef))
+
+        else:
+            mov_num_bef, turn_bef = self.get_move_before(move_number, turn)
+            game_data[move_number][turn]["castling"] =  copy.deepcopy(self.get_data_at_move(game_data, mov_num_bef, turn_bef)["castling"])
+
+
+        # check/checkmate
+        current_data = self.get_data_at_move(game_data, move_number, turn)
+        check = self.is_check(game_data, move_number, current_data["board"], turn)
+        if check:
+            game_data[move_number][turn]["check"] = {turn: False, (turn * -1): True }
+            mate = self.checkmate(game_data, move_number, turn)
+            if mate:
+                game_data[move_number][turn]["checkmate"] = {turn: False, (turn * -1): True }
+            else:
+                game_data[move_number][turn]["checkmate"] = {turn: False, (turn * -1): False }
+        else:
+            game_data[move_number][turn]["check"] = {turn: False, (turn * -1): False }
+            game_data[move_number][turn]["checkmate"] = {turn: False, (turn * -1): False }
+
 
 
         return game_data, move_number, turn
@@ -228,23 +260,31 @@ class Game():
         while True:
             move = {}
             move_input = user_input("move")
-            move["pos"] = {}
-            move["pos"]["from"] = self.get_pos(move_input[:2])
-            move["pos"]["to"] = self.get_pos(move_input[2:])
 
-            valid = False
-            poss_moves = self.get_all_possible_moves(self.game_data, self.move_number, self.turn)
-            for poss_move_from in poss_moves:
+            if move_input == "no command" or move_input == "no parameter" or move_input == "unknown command":
+                print(move_input)
+                continue
+
+            else:
+                move["pos"] = {}
+                move["pos"]["from"] = self.get_pos(move_input[:2])
+                move["pos"]["to"] = self.get_pos(move_input[2:])
+
+                valid = False
+                poss_moves = self.get_all_possible_moves(self.game_data, self.move_number, self.turn)
+                for poss_move_from in poss_moves:
+                    if valid:
+                        break
+                    if move["pos"]["from"] == poss_move_from:
+                        for poss_move_to in poss_moves[poss_move_from]:
+                            if move["pos"]["to"] == poss_move_to:
+                                valid = True
+                                break
+
                 if valid:
                     break
-                if move["pos"]["from"] == poss_move_from:
-                    for poss_move_to in poss_moves[poss_move_from]:
-                        if move["pos"]["to"] == poss_move_to:
-                            valid = True
-                            break
-
-            if valid:
-                break
+                else:
+                    print("not in possible moves")
         
         return move
 
@@ -295,15 +335,18 @@ class Game():
 
     def get_move_before(self, move_number, turn):
         
-        if turn > 1:
-            move_number -= 1
         turn *= -1
+        if turn < 1:
+            move_number -= 1
 
         return move_number, turn
 
 
-    def get_castling(self):
-        pass
+    def get_castling(self, game_data, move_number, turn):
+
+        castling = game_data[move_number][turn]["castling"]
+
+
 
     def enpassant(self):
         pass
@@ -338,9 +381,16 @@ class Game():
         return False
 
 
-    def checkmate(self, game_data, move_number, board, turn):
+    def checkmate(self, game_data, move_number, turn, check=True):
 
+        if check:
+            moves = self.get_all_possible_moves(game_data, move_number, turn)
+            for move in moves:
+                if moves[move]:
+                    mate = False
+                    return mate
+            mate = True
+        else:
+            mate = False
 
-        check = self.is_check(game_data, move_number, board, turn)
-
-        return check
+        return mate

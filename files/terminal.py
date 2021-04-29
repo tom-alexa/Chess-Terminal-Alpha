@@ -17,14 +17,85 @@ RESET = "\u001b[0m"
 BLANK_LINE = "\n"
 
 
+###########
+#  board  #
+###########
+
+# terminal board
+def main_terminal(action, *args, **kwargs):
+
+    operating_system = kwargs["operating_system"]
+
+    # reset window
+    if operating_system == "windows":
+        os.system("cls")
+    elif operating_system == "linux":
+        os.system("clear")
+
+    os.system("mode con: cols=100 lines=52")
+    if action == "introduction":
+        introduction()
+    elif action == "move":
+        board(kwargs)
+    elif action == "invalid move":
+        board(kwargs)
+        invalid_move()
+    elif action == "help":
+        print("this is help")
+
+
+#############################
+#  introduction and ending  #
+#############################
+
+# introduction
+def introduction():
+
+    spaces_from_left = 40
+    name = "Chess - terminal"
+    author = "by Tom Alexa"
+    spaces_between = (len(name) - len(author))//2
+
+    spaces = " " * spaces_from_left
+    print(f"\n\n\n\n\n{spaces}{name}")
+
+    spaces = " " * (spaces_from_left + spaces_between)
+    print(f"\n{spaces}{author}\n\n")
+
+    spaces = " " * (spaces_from_left + 2)
+    print(f"\n{spaces}HOW TO PLAY")
+
+    spaces = " " * (spaces_from_left - 10)
+    print(f"\n{spaces}The game works on basis of commands.\n")
+
+    spaces = " " * (spaces_from_left - 5)
+    print(f"{spaces}$ h             (print all commands)")
+    print(f"{spaces}$ h \'command\'   (print info about command)")
+    print(f"{spaces}$ m \'move\'      (make move)")
+
+
+
+
+    spaces = " " * (spaces_from_left - 20)
+    print(f"\n\n\n{spaces}Write \'l\'(linux) or \'w\' (windows)\n")
+
 
 
 ###########
 #  board  #
 ###########
 
-# terminal board
-def terminal_board(board, dimensions, colors):
+# print board
+def board(kwargs):
+
+    board = kwargs["current_data"]["board"]
+    colors = kwargs["colors"]
+    dimensions = kwargs["dimensions"]
+    check = kwargs["current_data"]["check"][(kwargs["turn"]*-1)]
+
+    # spaces from left side
+    spaces_from_left = 5
+
 
     #####################
     #  marks (letters)  #
@@ -36,7 +107,7 @@ def terminal_board(board, dimensions, colors):
         for i in line:
             for column in range(dimensions[1]+1):
                 if column < 1:
-                    line[i] += (" " * 19)
+                    line[i] += (" " * ( spaces_from_left+9) )
 
                 else:
                     desc = letters[column][i]
@@ -60,9 +131,9 @@ def terminal_board(board, dimensions, colors):
             string += line[i] + RESET + BLANK_LINE
 
         return string
-    
 
-    string_board = BLANK_LINE
+
+    string_board = ""
 
     pl_1_col = get_ascii_color(colors["pl_1"])
     pl_2_col = get_ascii_color(colors["pl_2"])
@@ -79,10 +150,9 @@ def terminal_board(board, dimensions, colors):
         line = {1: "", 2: "", 3: "", 4: "", 5:""}
 
         for i in line:
-            string_board += (" " * 10)
+            string_board += (" " * spaces_from_left)
 
             for column in range(dimensions[1]+2):
-
 
                 #####################
                 #  marks (numbers)  #
@@ -149,11 +219,16 @@ def terminal_board(board, dimensions, colors):
             string_board += line[i] + RESET + BLANK_LINE
 
     string_board = add_letters(string_board)
-
+    string_board = string_board[:-1]
 
     # print board on the screen
-    os.system("mode con: cols=120 lines=60")
     print(string_board)
+    if check:
+        print("!!! CHECK !!!")
+
+
+
+
 
 
 # just print symbol with added background
@@ -162,9 +237,6 @@ def square_symbol(string, color, symbol):
     string += color + symbol
 
     return string
-
-
-
 
 
 # function return color as ascii symbol
@@ -223,3 +295,11 @@ def create_numbers(columns):
     numbers[8] = {1: "", 2: " ┌─┐ ", 3: " ├─┤ ", 4: " └─┘ ", 5: ""}
 
     return numbers
+
+
+##################
+#  invalid move  #
+##################
+
+def invalid_move():
+    pass
