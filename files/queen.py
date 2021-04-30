@@ -5,32 +5,31 @@
 from files.piece import Piece
 
 
-##################
-#  queen object  #
-##################
+#################
+#  queen class  #
+#################
 
 # queen
 class Queen(Piece):
 
-    # initial queen
-    def __init__(self, color, pos):
+    # initialize queen
+    def __init__(self, player_id, pos):
         self.short = {1: "", 2: " - - ", 3: "-----", 4: " --- ", 5: ""}
-        super().__init__(color, pos, "queen")
+        super().__init__(player_id, "queen", pos)
 
 
     # get possible moves
-    def get_possible_moves(self, game_data, move_number, board, turn, dimensions, make_move, get_data_at_move, is_check, real=True):
+    def is_move_valid(self, game_data, move_number, board, turn, dimensions, make_move, get_data_at_move, is_check, pos, real=True):
 
-        possible_moves = {"from": self.pos, "to": set()}
-        for pos in board:
-            if pos != self.pos:
-                if (pos[0] == self.pos[0]) or (pos[1] == self.pos[1]) or (pos[0] - pos[1] == self.pos[0] - self.pos[1]) or ( (dimensions[0] - pos[0]) - pos[1] == (dimensions[0] - self.pos[0]) - self.pos[1] ):
-                    valid = self.is_valid(game_data, move_number, board, turn, make_move, get_data_at_move, is_check, pos, real)
+        valid = False
+        if pos != self.pos:
+            if (pos[0] == self.pos[0]) or (pos[1] == self.pos[1]) or (pos[0] - pos[1] == self.pos[0] - self.pos[1]) or ( (dimensions[0] - pos[0]) - pos[1] == (dimensions[0] - self.pos[0]) - self.pos[1] ):
+                valid = self.is_valid(game_data, move_number, board, turn, make_move, get_data_at_move, is_check, pos, real)
 
-                    if valid:
-                        possible_moves["to"].add(pos)
+                if valid:
+                    return valid
 
-        return possible_moves
+        return valid
 
 
     # is it a valid move
@@ -42,6 +41,6 @@ class Queen(Piece):
             valid = self.check_diagonal(board, pos)
 
         if valid and real:
-            valid = self.check_if_valid(game_data, move_number, board, turn, make_move, get_data_at_move, is_check, pos)
+            valid = self.check_if_valid(game_data, move_number, turn, make_move, get_data_at_move, is_check, pos)
 
         return valid

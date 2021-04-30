@@ -5,14 +5,14 @@
 from files.piece import Piece
 
 
-###################
-#  knight object  #
-###################
+##################
+#  knight class  #
+##################
 
 # knight
 class Knight(Piece):
 
-    # initial knight
+    # initialize knight
     def __init__(self, color, pos):
         self.short = {1: "", 2: "---- ", 3: "  ---", 4: " ----", 5:""}
         super().__init__(color, pos, "knight")

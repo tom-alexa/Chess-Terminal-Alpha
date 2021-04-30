@@ -5,29 +5,29 @@
 import copy
 
 
-##################
-#  piece object  #
-##################
+#################
+#  piece class  #
+#################
 
 # piece
 class Piece():
 
-    # initial piece
-    def __init__(self, color, pos, description):
+    # initialize piece
+    def __init__(self, player_id, description, pos):
 
         # parameters
-        self.color = color
-        self.pos = pos
+        self.player_id = player_id
         self.description = description
+        self.pos = pos
 
 
     # function tells you if king is in check position, therefore it is forbidden
-    def check_if_valid(self, game_data, move_number, board, turn, make_move, get_data_at_move, is_check, move):
+    def check_if_valid(self, game_data, move_number, turn, make_move, get_data_at_move, is_check, move):
 
         copy_data = copy.deepcopy(game_data)
         mod_move = {"pos": {"from": self.pos, "to": move} }
         mod_board = get_data_at_move(copy_data, move_number, turn)["board"]
-        data, move_number, turn = make_move(copy_data, move_number, mod_move, turn)
+        data, move_number, turn = make_move(copy_data, move_number, turn, mod_move)
 
         valid = not (is_check(data, move_number, get_data_at_move(data, move_number, turn )["board"], turn, attack=False) )
 

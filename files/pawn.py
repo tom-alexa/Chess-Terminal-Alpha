@@ -5,14 +5,14 @@
 from files.piece import Piece
 
 
-#################
-#  pawn object  #
-#################
+################
+#  pawn class  #
+################
 
 # pawn
 class Pawn(Piece):
 
-    # initial pawn
+    # initialize pawn
     def __init__(self, color, pos):
         super().__init__(color, pos, "pawn")
 

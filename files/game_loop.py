@@ -10,17 +10,17 @@ from files.game import Game
 ###############
 
 # game loop
-def game_loop(op_sys):
+def game_loop(terminal):
     
     # running in while loop, if game is finished ask for another one
     running = True
     while running:
 
         # ask user for data (how many players, difficulty, players names)
-        game_data = get_starting_data()  # return dictionary
+        pregame_data = get_starting_data()  # return dictionary
 
         # game object
-        game = Game(game_data["number of players"], game_data["difficulty"], game_data["names"], game_data["player color"], op_sys)
+        game = Game(terminal, pregame_data["number_of_players"], pregame_data["human_players_id"], pregame_data["difficulty"], pregame_data["names"])
         game.play()
 
         # game conclusion (who wins etc.)
@@ -39,10 +39,10 @@ def get_starting_data():
 
     # creating data dictionary
     game_data = {}
-    game_data["number of players"] = 1
+    game_data["number_of_players"] = 2
+    game_data["human_players_id"] = {1}
     game_data["difficulty"] = None
     game_data["names"] = None
-    game_data["player color"] = "white"
 
     return game_data
 

@@ -1,58 +1,73 @@
 
 #                   | main ➔ terminal
-# Chess in terminal | main ➔ game_loop ➔ terminal
-#                   | main ➔ game_loop ➔ game ➔ terminal
+# Chess in terminal | main ➔ game_loop ➔ terminal ➔ user_input
+#                   | main ➔ game_loop ➔ game ➔ terminal ➔ user_input
 
 # This file manage users inputs.
 
-# imports
-from files.terminal import main_terminal
 
-
-###################
-#  main function  #
-###################
+#######################
+#  user input object  #
+#######################
 
 # user input
-def user_input(action):
+class User_input():
 
-    spaces = " " * 10
-    usr_inp = input(f"{spaces}@chess-terminal $ ").split()
-    lenght = len(usr_inp)
+    ###################
+    #  main function  #
+    ###################
 
+    # user input
+    def main(self, action):
 
+        spaces = " " * 10
+        usr_inp = input(f"{spaces}@chess-terminal $ ").split()
+        lenght = len(usr_inp)
 
+        if action == "move":
+            self.move()
 
-    if lenght >= 1:
-        command = usr_inp[0]
-
-
-        if action == "operating system":
-            if command == "w" or command == "windows":
-                return "windows"
-            elif command == "l" or command == "linux":
-                return "linux"
-            else:
-                return "unknown"
+        if lenght >= 1:
+            command = usr_inp[0]
 
 
-        if command == "m":
-            if action == "move":
-                if lenght > 1:
-                    parameter = usr_inp[1]
-                    return parameter
+            if action == "operating system":
+                if command == "w" or command == "windows":
+                    return "windows"
+                elif command == "l" or command == "linux":
+                    return "linux"
                 else:
-                    return "no parameter"
-            else:
-                return "no move"
+                    return "unknown"
 
-        elif command == "h":
-            main_terminal("help")
-            return user_input(action)
+
+            if command == "m":
+                if action == "move":
+                    if lenght > 1:
+                        parameter = usr_inp[1]
+                        return parameter
+                    else:
+                        return "no parameter"
+                else:
+                    return "no move"
+
+            elif command == "h":
+                main_terminal("help")
+                return user_input(action)
+
+            else:
+                return "unknown command"
 
         else:
-            return "unknown command"
+            return "no command"
 
-    else:
-        return "no command"
+    # get operating system
+    def get_operating_system(self):
+
+        return "w"
+
+    def move(self):
+        move_input = ""
+        if move_input == "no command" or move_input == "no parameter" or move_input == "unknown command":
+            print(move_input)
+        return move_input
 

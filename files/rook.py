@@ -5,14 +5,14 @@
 from files.piece import Piece
 
 
-#################
-#  rook object  #
-#################
+################
+#  rook class  #
+################
 
 # rook
 class Rook(Piece):
 
-    # initial rook
+    # initialize rook
     def __init__(self, color, pos):
         self.short = {1: "", 2: "- - -", 3: " --- ", 4: "-----", 5: ""}
         super().__init__(color, pos, "rook")

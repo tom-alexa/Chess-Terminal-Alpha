@@ -6,8 +6,7 @@
 
 # imports
 from files.game_loop import game_loop
-from files.terminal import main_terminal
-from files.user_input import user_input
+from files.terminal import Terminal
 
 
 # structure | main ➔ game_loop ➔ game ➔  king  ➔ piece
@@ -47,9 +46,10 @@ def ending():
 # main function
 def main():
 
-    introduction()
-    op_sys = operating_system()
-    game_loop(op_sys)
+    terminal = Terminal()
+    # introduction()
+    # op_sys = operating_system()
+    game_loop(terminal)
     ending()
 
 
