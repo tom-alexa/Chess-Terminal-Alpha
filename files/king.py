@@ -20,26 +20,23 @@ class King(Piece):
 
 
     # get possible moves
-    def is_move_valid(self, game_data, move_number, board, turn, dimensions, make_move, get_data_at_move, is_check, pos, real=True):
+    def is_in_potencial_moves(self, current_data, pos):
 
-        valid = False
         if pos != self.pos:
-            if (pos[0] == self.pos[0] - 1) or (pos[0] == self.pos[0]) or (pos[0] == self.pos[0] + 1):
+            if (pos[0] == self.pos[0] - 1) or (pos[0] == self.pos[0]) or (pos[0] == self.pos[0] + 1):               # one square far
                 if (pos[1] == self.pos[1] - 1) or (pos[1] == self.pos[1]) or (pos[1] == self.pos[1] + 1):
-                    valid = self.is_valid(game_data, move_number, board, turn, make_move, get_data_at_move, is_check, pos, real)
-
-        return valid
+                    return True
+                elif current_data["castling"][0] and (pos[0] == self.pos[0]) and (pos[1] == self.pos[1] - 2):       # two square far if castling
+                    return True
+                elif current_data["castling"][1] and (pos[0] == self.pos[0]) and (pos[1] == self.pos[1] + 2):
+                    return True
 
 
     # is it a valid move
-    def is_valid(self, game_data, move_number, board, turn, make_move, get_data_at_move, is_check, pos, real):
+    def is_valid(self, current_data, pos):
 
         if pos[0] == self.pos[0] or pos[1] == self.pos[1]:
-            valid = self.check_row_column(board, pos)
+            return self.check_row_column(current_data["board"], pos)
         else:
-            valid = self.check_diagonal(board, pos)
+            return self.check_diagonal(current_data["board"], pos)
 
-        if valid and real:
-            valid = self.check_if_valid(game_data, move_number, turn, make_move, get_data_at_move, is_check, pos)
-
-        return valid
