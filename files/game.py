@@ -40,7 +40,7 @@ class Game():
         self.move_index = {"move_number": move_number, "player_id": player_id}
 
         # main unit (stores data about every move, if you look inside you can see data about moves you want)
-        self.game_data = {move_number: {"board": self.create_board(), "castling": self.create_castling(), "check": self.create_check(), "checkmate": self.create_check(), "stalemate": self.create_check(), "last_pawn_move": move_number } }
+        self.game_data = {move_number: {"board": self.create_board(), "castling": self.create_castling(), "check": self.create_check(), "last_pawn_move": move_number } }
 
         # colors
         self.colors = self.board_colors()               # data about game color, how terminal will visualize the game
@@ -80,10 +80,10 @@ class Game():
                 king = King(player_id, (row, column))
                 board[(row, column)] = king
 
-                # # queen
-                # column = 4
-                # queen = Queen(player_id, (row, column))
-                # board[(row, column)] = queen
+                # queen
+                column = 4
+                queen = Queen(player_id, (row, column))
+                board[(row, column)] = queen
 
                 # rook
                 for column in [1, 8]:
@@ -91,21 +91,21 @@ class Game():
                     board[(row, column)] = rook
 
 
-                # # knight
-                # for column in [2, 7]:
-                #     knight = Knight(player_id, (row, column))
-                #     board[(row, column)] = knight
+                # knight
+                for column in [2, 7]:
+                    knight = Knight(player_id, (row, column))
+                    board[(row, column)] = knight
 
-                # # bishop
-                # for column in [3, 6]:
-                #     bishop = Bishop(player_id, (row, column))
-                #     board[(row, column)] = bishop
+                # bishop
+                for column in [3, 6]:
+                    bishop = Bishop(player_id, (row, column))
+                    board[(row, column)] = bishop
 
-                # # pawn
-                # row = 2 if player_id == 0 else 7
-                # for column in range(1, self.dimensions[0]+1):
-                #     pawn = Pawn(player_id, (row, column))
-                #     board[(row, column)] = pawn
+                # pawn
+                row = 2 if player_id == 0 else 7
+                for column in range(1, self.dimensions[0]+1):
+                    pawn = Pawn(player_id, (row, column))
+                    board[(row, column)] = pawn
 
 
     ####################################
@@ -220,14 +220,17 @@ class Game():
         # get all possible moves
         possible_moves = self.get_all_possible_moves(game_data, move_index, player_id)
 
+        # print board
+        self.terminal.board(self.get_data_at_move(game_data, move_index), player_id, self.colors, self.dimensions)
+
         # get user input
         while True:
-            move_input = self.user_input.main("move")
+            move_input = self.user_input.move(self.names[player_id])
             move = { "pos": {"from": self.get_pos(move_input[:2]), "to": self.get_pos(move_input[2:]) } }
 
             if move["pos"]["from"] in possible_moves:
                 poss_moves_to = possible_moves[move["pos"]["from"]]
-                for poss_move_to in move["pos"]["to"]:
+                if move["pos"]["to"] in poss_moves_to:
                     return move
 
             print("not in possible moves")
@@ -302,7 +305,7 @@ class Game():
         if move["castling"]:
             self.castling(current_data["board"], move)
         elif move["en_passant"]:
-            self.en_passant(current_data["board"])
+            self.en_passant(current_data["board"], move)
 
         # update current data to game data
         self.update_move(game_data, move_index, move)
@@ -373,6 +376,8 @@ class Game():
         for player_id in range(self.number_of_players):             # for every player
             if self.is_in_check(game_data, move_index, player_id):                      # check
                 current_data["check"][player_id] = True
+            else:
+                current_data["check"][player_id] = False
 
 
     # castling
@@ -479,7 +484,7 @@ class Game():
         """
         attack_pieces = set()
         for piece in pieces:
-            if piece.is_move_possible(game_data, move_index, attack_pos, check_matter, is_in_check=self.is_in_check, make_move=self.make_move, is_castling=self.is_castling, is_en_passant=self.is_en_passant, get_data_at_move=self.get_data_at_move):
+            if piece.is_move_possible(game_data, move_index, attack_pos, check_matter, self.dimensions, is_in_check=self.is_in_check, make_move=self.make_move, is_castling=self.is_castling, is_en_passant=self.is_en_passant, get_data_at_move=self.get_data_at_move, change_move_index=self.change_move_index):
                 attack_pieces.add(piece)
 
         return attack_pieces

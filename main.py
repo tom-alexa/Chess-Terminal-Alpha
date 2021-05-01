@@ -22,8 +22,8 @@ from files.terminal import Terminal
 ############
 
 # introduction
-def introduction():
-    main_terminal("introduction", operating_system=None)
+def introduction(terminal):
+    terminal.introduction()
 
 
 # get operating system
@@ -47,10 +47,9 @@ def ending():
 def main():
 
     terminal = Terminal()
-    # introduction()
-    # op_sys = operating_system()
+    introduction(terminal)
     game_loop(terminal)
-    ending()
+    ending(terminal)
 
 
 # main

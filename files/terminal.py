@@ -20,37 +20,14 @@ class Terminal():
     # initialize terminal
     def __init__(self):
 
-        self.user_input = User_input()
+        # spaces from the left
+        self.spaces = " " * 14
+        self.bonus_spaces = " " * 10
+
+        self.user_input = User_input(self, self.spaces, self.bonus_spaces)
         self.operating_system = self.user_input.get_operating_system()
         self.RESET = "\u001b[0m"
         self.BLANK_LINE = "\n"
-
-
-    ###########
-    #  board  #
-    ###########
-
-    # terminal board
-    def main_terminal(self, action, *args, **kwargs):
-
-        operating_system = kwargs["operating_system"]
-
-        # reset window
-        if operating_system == "windows":
-            os.system("cls")
-        elif operating_system == "linux":
-            os.system("clear")
-
-        os.system("mode con: cols=100 lines=52")
-        if action == "introduction":
-            introduction()
-        elif action == "move":
-            board(kwargs)
-        elif action == "invalid move":
-            board(kwargs)
-            invalid_move()
-        elif action == "help":
-            print("this is help")
 
 
     #############################
@@ -58,7 +35,9 @@ class Terminal():
     #############################
 
     # introduction
-    def introduction(self, ):
+    def introduction(self):
+
+        self.reset_window()
 
         spaces_from_left = 40
         name = "Chess - terminal"
@@ -82,12 +61,7 @@ class Terminal():
         print(f"{spaces}$ h \'command\'   (print info about command)")
         print(f"{spaces}$ m \'move\'      (make move)")
 
-
-
-
-        spaces = " " * (spaces_from_left - 20)
-        print(f"\n\n\n{spaces}Write \'l\'(linux) or \'w\' (windows)\n")
-
+        self.user_input.press_enter()
 
 
     ###########
@@ -95,65 +69,28 @@ class Terminal():
     ###########
 
     # print board
-    def board(self, kwargs):
+    def board(self, current_data, player_id, colors, dimensions):
 
-        board = kwargs["current_data"]["board"]
-        colors = kwargs["colors"]
-        dimensions = kwargs["dimensions"]
-        check = kwargs["current_data"]["check"][(kwargs["turn"]*-1)]
+        # reset window
+        self.reset_window()
+
+        board = current_data["board"]
+        check = current_data["check"][player_id]
 
         # spaces from left side
         spaces_from_left = 5
 
-
-        #####################
-        #  marks (letters)  #
-        #####################
-
-        def add_letters(self, string):
-
-            line = {1: "", 2: "", 3: "", 4: "", 5:""}
-            for i in line:
-                for column in range(dimensions[1]+1):
-                    if column < 1:
-                        line[i] += (" " * ( spaces_from_left+9) )
-
-                    else:
-                        desc = letters[column][i]
-                        bg = RESET
-
-                        if desc:
-                            clr = RESET
-
-                            for _ in range(2):
-                                line[i] = square_symbol(line[i], bg, " ")
-
-                            for place_in_desc in desc:
-                                if place_in_desc != " ":
-                                    line[i] = square_symbol(line[i], clr, place_in_desc)
-                                else:
-                                    line[i] = square_symbol(line[i], bg, " ")
-
-                            for _ in range(2):
-                                line[i] = square_symbol(line[i], bg, " ")
-
-                string += line[i] + RESET + BLANK_LINE
-
-            return string
-
-
+        # create string
         string_board = ""
 
-        pl_1_col = get_ascii_color(colors["pl_1"])
-        pl_2_col = get_ascii_color(colors["pl_2"])
-        bg_1 = get_ascii_color(colors["bg_1"], backgound=True)
-        bg_2 = get_ascii_color(colors["bg_2"], backgound=True)
+        pl_1_col = self.get_ascii_color(colors["pl_1"])
+        pl_2_col = self.get_ascii_color(colors["pl_2"])
+        bg_1 = self.get_ascii_color(colors["bg_1"], backgound=True)
+        bg_2 = self.get_ascii_color(colors["bg_2"], backgound=True)
 
-        numbers = create_numbers(dimensions[0])
-        letters = create_letters(dimensions[1])
+        numbers = self.create_numbers(dimensions[0])
 
-
-        string_board = add_letters(string_board)
+        string_board = self.add_letters(string_board, dimensions, spaces_from_left)
 
         for row in range(dimensions[0], 0, -1):
             line = {1: "", 2: "", 3: "", 4: "", 5:""}
@@ -169,26 +106,26 @@ class Terminal():
 
                     if column < 1 or column > dimensions[1]:
                         desc = numbers[row][i]
-                        bg = RESET
+                        bg = self.RESET
 
                         if desc:
-                            clr = RESET
+                            clr = self.RESET
 
                             for _ in range(2):
-                                line[i] = square_symbol(line[i], bg, " ")
+                                line[i] = self.square_symbol(line[i], bg, " ")
 
                             for place_in_desc in desc:
                                 if place_in_desc != " ":
-                                    line[i] = square_symbol(line[i], clr, place_in_desc)
+                                    line[i] = self.square_symbol(line[i], clr, place_in_desc)
                                 else:
-                                    line[i] = square_symbol(line[i], bg, " ")
+                                    line[i] = self.square_symbol(line[i], bg, " ")
 
                             for _ in range(2):
-                                line[i] = square_symbol(line[i], bg, " ")
+                                line[i] = self.square_symbol(line[i], bg, " ")
 
                         else:
                             for _ in range(9):
-                                line[i] = square_symbol(line[i], bg, " ")
+                                line[i] = self.square_symbol(line[i], bg, " ")
 
 
                     ################
@@ -203,31 +140,31 @@ class Terminal():
                             desc = piece.short[i]
 
                             if desc:
-                                clr = pl_1_col if piece.color == "white" else pl_2_col
+                                clr = pl_1_col if piece.player_id == player_id else pl_2_col
 
                                 for _ in range(2):
-                                    line[i] = square_symbol(line[i], bg, " ")
+                                    line[i] = self.square_symbol(line[i], bg, " ")
 
                                 for place_in_desc in desc:
                                     if place_in_desc != " ":
-                                        line[i] = square_symbol(line[i], clr, "█")
+                                        line[i] = self.square_symbol(line[i], clr, "█")
                                     else:
-                                        line[i] = square_symbol(line[i], bg, " ")
+                                        line[i] = self.square_symbol(line[i], bg, " ")
 
                                 for _ in range(2):
-                                    line[i] = square_symbol(line[i], bg, " ")
+                                    line[i] = self.square_symbol(line[i], bg, " ")
 
                             else:
                                 for _ in range(9):
-                                    line[i] = square_symbol(line[i], bg, " ")
+                                    line[i] = self.square_symbol(line[i], bg, " ")
 
                         else:
                             for _ in range(9):
-                                line[i] = square_symbol(line[i], bg, " ")
+                                line[i] = self.square_symbol(line[i], bg, " ")
 
-                string_board += line[i] + RESET + BLANK_LINE
+                string_board += line[i] + self.RESET + self.BLANK_LINE
 
-        string_board = add_letters(string_board)
+        string_board = self.add_letters(string_board, dimensions, spaces_from_left)
         string_board = string_board[:-1]
 
         # print board on the screen
@@ -236,15 +173,48 @@ class Terminal():
             print("!!! CHECK !!!")
 
 
+    #####################
+    #  marks (letters)  #
+    #####################
 
+    def add_letters(self, string, dimensions, spaces_from_left):
 
+        letters = self.create_letters(dimensions[1])
+
+        line = {1: "", 2: "", 3: "", 4: "", 5:""}
+        for i in line:
+            for column in range(dimensions[1]+1):
+                if column < 1:
+                    line[i] += (" " * ( spaces_from_left+9) )
+
+                else:
+                    desc = letters[column][i]
+                    bg = self.RESET
+
+                    if desc:
+                        clr = self.RESET
+
+                        for _ in range(2):
+                            line[i] = self.square_symbol(line[i], bg, " ")
+
+                        for place_in_desc in desc:
+                            if place_in_desc != " ":
+                                line[i] = self.square_symbol(line[i], clr, place_in_desc)
+                            else:
+                                line[i] = self.square_symbol(line[i], bg, " ")
+
+                        for _ in range(2):
+                            line[i] = self.square_symbol(line[i], bg, " ")
+
+            string += line[i] + self.RESET + self.BLANK_LINE
+
+        return string
 
 
     # just print symbol with added background
     def square_symbol(self, string, color, symbol):
 
         string += color + symbol
-
         return string
 
 
@@ -275,7 +245,7 @@ class Terminal():
 
 
     # create letter
-    def create_letters(self, rows):
+    def create_letters(self, columns):
 
         letters = {}
         letters[1] = {1: "", 2: " ┌─┐ ", 3: "┌┴─┴┐", 4: "┴   ┴", 5: ""}
@@ -291,8 +261,8 @@ class Terminal():
 
 
     # create numbers
-    def create_numbers(self, columns):
-        
+    def create_numbers(self, rows):
+
         numbers = {}
         numbers[1] = {1: "", 2: " ┌┐  ", 3: "  │  ", 4: " ─┴─ ", 5: ""}
         numbers[2] = {1: "", 2: " ┌─┐ ", 3: " ┌─┘ ", 4: " └── ", 5: ""}
@@ -306,9 +276,79 @@ class Terminal():
         return numbers
 
 
-    ##################
-    #  invalid move  #
-    ##################
+    ##############
+    #  manually  #
+    ##############
 
-    def invalid_move(self, ):
-        pass
+    # write manually
+    def manually(self, sentence):
+        print(f"\n{self.bonus_spaces}{sentence}\n")
+
+
+    ######################
+    #  commands ➔ help  #
+    ######################
+
+    # main help
+    def help_overal(self):
+
+        self.reset_window()
+        print("overal help")
+        self.user_input.press_enter()
+
+
+    # move help
+    def help_move(self):
+
+        self.reset_window()
+        print("move help")
+        self.user_input.press_enter()
+
+
+    ######################
+    #  commands ➔ move  #
+    ######################
+
+    # there is no game to make move
+    def move_no_game(self):
+
+        print("You have to start game first!")
+
+
+    #########################
+    #  commands ➔ invalid  #
+    #########################
+
+    # invalid bash
+    def invalid_bash(self, bash):
+
+        print(f"invalid bash \'{bash}\'")
+
+
+    # invalid parameters
+    def invalid_parameters(self, bash, paramaters):
+
+        paramaters_string = " ".join(paramaters)
+        print(f"bash {bash} has no parameter(s) {paramaters_string}")
+
+
+    # missing parameters
+    def missing_parameters(self, bash, number):
+        print(f"bash {bash} require {number} parameter(s)")
+
+
+    ###########
+    #  reset  #
+    ###########
+
+    # reset window
+    def reset_window(self):
+
+        # clean window
+        if self.operating_system == "windows":
+            os.system("cls")
+        elif self.operating_system == "linux":
+            os.system("clear")
+
+        # new window size
+        os.system("mode con: cols=100 lines=52")

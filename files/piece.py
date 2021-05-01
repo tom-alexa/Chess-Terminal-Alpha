@@ -25,22 +25,24 @@ class Piece():
     #  possible move  #
     ###################
 
-    # function tells you if king is in check position, therefore it is forbidden
-    def is_move_possible(self, game_data, move_index, pos, check_matter, *args, **kwargs):
-
+    # return if move is possible
+    def is_move_possible(self, game_data, move_index, pos, check_matter, dimensions, *args, **kwargs):
+        """
+            Function returns if the exact move is possible for this piece
+        """
         current_data = kwargs["get_data_at_move"](game_data, move_index)
 
-        if self.is_in_potencial_moves(current_data, pos):
+        if self.is_in_potencial_moves(current_data, pos, dimensions):
             if self.is_valid(current_data, pos):
                 if check_matter:
 
                     move = {"pos": {"from": self.pos, "to": pos} }
                     move["castling"] = True if kwargs["is_castling"](current_data["board"], move) else False
-                    move["en_passant"] = kwargs["is_en_passant"](current_data, move)
+                    move["en_passant"] = True if kwargs["is_en_passant"](current_data, move) else False
 
                     new_data = copy.deepcopy(game_data)
                     kwargs["make_move"](new_data, move_index, move)
-                    if not kwargs["is_in_check"](new_data, move_index, self.player_id):
+                    if not kwargs["is_in_check"](new_data, kwargs["change_move_index"](copy.deepcopy(move_index)), self.player_id):
                         return True
                 else:
                     return True
@@ -52,7 +54,9 @@ class Piece():
 
     # check row
     def check_row_column(self, board, pos):
-
+        """
+            Check if there are any pieces between old position and new position, if not return True
+        """
         if pos[0] == self.pos[0]:
             same_index = 0
             change_index = 1
@@ -73,7 +77,7 @@ class Piece():
                 check_pos = (pos[0] + (i * multiply), pos[1])
 
             if board[check_pos]:
-                if board[check_pos].color == self.color:
+                if board[check_pos].player_id == self.player_id:
                     return False
                 else:
                     if (check_pos != pos) or self.description == "pawn":
@@ -84,7 +88,9 @@ class Piece():
 
     # check column
     def check_diagonal(self, board, pos, last_move=None):
-
+        """
+            Check if there are any pieces between old position and new position, if not return True
+        """
         if pos[0] - pos[1] == self.pos[0] - self.pos[1]:
             change_meta = 1
         else:
@@ -102,7 +108,7 @@ class Piece():
             check_pos = (pos[0] - (i * first), pos[1] - (i * second))
 
             if board[check_pos]:
-                if board[check_pos].color == self.color:
+                if board[check_pos].player_id == self.player_id:
                     return False
                 else:
                     if check_pos != pos:
@@ -110,7 +116,7 @@ class Piece():
 
             elif self.description == "pawn":                # en passant
                 if last_move:
-                    if (board[last_move["pos"]["to"]].description == "pawn") and  (last_move["to"][0] == self.pos[0]) and (last_move["pos"]["to"][1] == pos[1]):
+                    if (board[last_move["pos"]["to"]].description == "pawn") and  (last_move["pos"]["to"][0] == self.pos[0]) and (last_move["pos"]["to"][1] == pos[1]):
                         return True
                     else:
                         return False
