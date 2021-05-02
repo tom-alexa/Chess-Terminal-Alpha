@@ -26,17 +26,9 @@ def introduction(terminal):
     terminal.introduction()
 
 
-# get operating system
-def operating_system():
-    while True:
-        op_sys = user_input("operating system")
-        if op_sys != "unknown" and op_sys != "no command":
-            return op_sys
-
-
 # ending
-def ending():
-    main_terminal("ending")
+def ending(terminal):
+    terminal.ending()
 
 
 ##########

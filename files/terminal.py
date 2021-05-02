@@ -21,13 +21,94 @@ class Terminal():
     def __init__(self):
 
         # spaces from the left
-        self.spaces = " " * 14
-        self.bonus_spaces = " " * 10
+        self.spaces = " " * 10
 
-        self.user_input = User_input(self, self.spaces, self.bonus_spaces)
-        self.operating_system = self.user_input.get_operating_system()
+        self.user_input = User_input(self)
         self.RESET = "\u001b[0m"
         self.BLANK_LINE = "\n"
+
+        while True:
+            self.specific_output("Are you on linux (l) or windows (w)?")
+            usr_inp = self.user_input.specific_input( {"windows": {"exact": {"w", "windows"}, "similar": set() }, "linux": {"exact": {"l", "linux"}, "similar": set() } } )
+            if usr_inp:
+                self.operating_system = usr_inp
+                break
+
+
+    ##############
+    #  specific  #
+    ##############
+
+    # write manually
+    def specific_output(self, sentence):
+        print(f"\n{self.spaces}{sentence}")
+
+    # enter output
+    def press_enter(self):
+        self.specific_output("Press ENTER to continue!")
+
+
+    ########################
+    #  commands ➔ overal  #
+    ########################
+
+    # missing parameters
+    def missing_parameters(self, bash, number):
+        print(f"\n{self.spaces}Missing parameter(s): bash \'{bash}\' requires {number} parameter(s)!")
+
+    # too many parameters
+    def too_many_parameters(self, bash, number):
+        print(f"\n{self.spaces}Too many parameters: bash \'{bash}\' requires {number} parameter(s)!")
+
+
+    #########################
+    #  commands ➔ invalid  #
+    #########################
+
+    # invalid bash
+    def invalid_bash(self, bash):
+        print(f"\n{self.spaces}Invalid bash: bash \'{bash}\' does not exist!")
+
+
+    # invalid parameters
+    def invalid_parameters(self, bash, paramaters):
+        paramaters_string = ", ".join(paramaters)
+        print(f"\n{self.spaces}Invalid parameter(s): bash \'{bash}\' has no parameter(s) {paramaters_string}")
+
+
+    ######################
+    #  commands ➔ help  #
+    ######################
+
+    # main help
+    def help_overal(self, name):
+
+        self.reset_window()
+        print(f"\n{self.spaces}Overal help")
+        usr = False
+        while not usr:
+            self.press_enter()
+            usr = self.user_input.just_enter("help", name=name)
+
+
+    # move help
+    def help_move(self, name):
+
+        self.reset_window()
+        print(f"\n{self.spaces}Move help")
+        usr = False
+        while not usr:
+            self.press_enter()
+            usr = self.user_input.just_enter("help", name=name)
+
+
+    ######################
+    #  commands ➔ move  #
+    ######################
+
+    # there is no game to make move
+    def move_no_game(self):
+        print(f"\n{self.spaces}You have to start game first!")
 
 
     #############################
@@ -61,7 +142,28 @@ class Terminal():
         print(f"{spaces}$ h \'command\'   (print info about command)")
         print(f"{spaces}$ m \'move\'      (make move)")
 
-        self.user_input.press_enter()
+        self.press_enter()
+
+        usr_inp = False
+        while not usr_inp:
+            usr_inp = self.user_input.just_enter("introduction")
+
+
+    ###########
+    #  reset  #
+    ###########
+
+    # reset window
+    def reset_window(self):
+
+        # clean window
+        if self.operating_system == "windows":
+            os.system("cls")
+        elif self.operating_system == "linux":
+            os.system("clear")
+
+        # new window size
+        os.system("mode con: cols=100 lines=52")
 
 
     ###########
@@ -173,10 +275,11 @@ class Terminal():
             print("!!! CHECK !!!")
 
 
-    #####################
-    #  marks (letters)  #
-    #####################
+    ##############################
+    #  board ➔ marks (letters)  #
+    ##############################
 
+    # letters
     def add_letters(self, string, dimensions, spaces_from_left):
 
         letters = self.create_letters(dimensions[1])
@@ -210,6 +313,10 @@ class Terminal():
 
         return string
 
+
+    ####################
+    #  board ➔ other  #
+    ####################
 
     # just print symbol with added background
     def square_symbol(self, string, color, symbol):
@@ -274,81 +381,3 @@ class Terminal():
         numbers[8] = {1: "", 2: " ┌─┐ ", 3: " ├─┤ ", 4: " └─┘ ", 5: ""}
 
         return numbers
-
-
-    ##############
-    #  manually  #
-    ##############
-
-    # write manually
-    def manually(self, sentence):
-        print(f"\n{self.bonus_spaces}{sentence}\n")
-
-
-    ######################
-    #  commands ➔ help  #
-    ######################
-
-    # main help
-    def help_overal(self):
-
-        self.reset_window()
-        print("overal help")
-        self.user_input.press_enter()
-
-
-    # move help
-    def help_move(self):
-
-        self.reset_window()
-        print("move help")
-        self.user_input.press_enter()
-
-
-    ######################
-    #  commands ➔ move  #
-    ######################
-
-    # there is no game to make move
-    def move_no_game(self):
-
-        print("You have to start game first!")
-
-
-    #########################
-    #  commands ➔ invalid  #
-    #########################
-
-    # invalid bash
-    def invalid_bash(self, bash):
-
-        print(f"invalid bash \'{bash}\'")
-
-
-    # invalid parameters
-    def invalid_parameters(self, bash, paramaters):
-
-        paramaters_string = " ".join(paramaters)
-        print(f"bash {bash} has no parameter(s) {paramaters_string}")
-
-
-    # missing parameters
-    def missing_parameters(self, bash, number):
-        print(f"bash {bash} require {number} parameter(s)")
-
-
-    ###########
-    #  reset  #
-    ###########
-
-    # reset window
-    def reset_window(self):
-
-        # clean window
-        if self.operating_system == "windows":
-            os.system("cls")
-        elif self.operating_system == "linux":
-            os.system("clear")
-
-        # new window size
-        os.system("mode con: cols=100 lines=52")

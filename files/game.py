@@ -23,20 +23,20 @@ class Game():
     ################
 
     # initialize game
-    def __init__(self, terminal, number_of_players, human_players_id, difficulty, names, dimensions=(8, 8)):
+    def __init__(self, terminal, pregame_data, dimensions=(8, 8)):
 
         # parameters
-        self.terminal = terminal                        # terminal where everything is printed
-        self.user_input = self.terminal.user_input      # where we get all user inputs
-        self.number_of_players = number_of_players      # including either bots and human players
-        self.human_players_id = human_players_id        # set contains ids of human players
-        self.difficulty = difficulty                    # how difficult it is to beat the bot
-        self.names = names                              # players names (bots has "BOT" before name)
-        self.dimensions = dimensions                    # (rows, columns)
+        self.terminal = terminal                                        # terminal where everything is printed
+        self.user_input = self.terminal.user_input                      # where we get all user inputs
+        self.number_of_players = pregame_data["number_of_players"]      # including either bots and human players
+        self.human_players_id = pregame_data["human_players_id"]        # set contains ids of human players
+        self.difficulty = pregame_data["difficulty"]                    # how difficult it is to beat the bot
+        self.names = pregame_data["names"]                              # players names (bots has "BOT" before name)
+        self.dimensions = dimensions                                    # (rows, columns)
 
         # game data
-        move_number = 0                                 # each player plays once in every turn until game is finished
-        player_id = self.number_of_players - 1          # player_id and move number are data about last move, so it is NOT saying whose turn it is NOW
+        move_number = 0                                                 # each player plays once in every turn until game is finished
+        player_id = self.number_of_players - 1                          # player_id and move number are data about last move, so it is NOT saying whose turn it is NOW
         self.move_index = {"move_number": move_number, "player_id": player_id}
 
         # main unit (stores data about every move, if you look inside you can see data about moves you want)
@@ -225,20 +225,39 @@ class Game():
 
         # get user input
         while True:
-            move_input = self.user_input.move(self.names[player_id])
-            move = { "pos": {"from": self.get_pos(move_input[:2]), "to": self.get_pos(move_input[2:]) } }
 
-            if move["pos"]["from"] in possible_moves:
-                poss_moves_to = possible_moves[move["pos"]["from"]]
-                if move["pos"]["to"] in poss_moves_to:
-                    return move
 
-            print("not in possible moves")
+            usr_inp = False
+            while not usr_inp:
+                usr_inp = self.user_input.command_input("make_move", name=self.names[player_id])
+
+            if usr_inp[0] == "m":
+                try:
+                    move = { "pos": {"from": self.get_pos(usr_inp[1][0][:2]), "to": self.get_pos(usr_inp[1][0][2:]) } }
+                    if move["pos"]["from"] in possible_moves:
+                        poss_moves_to = possible_moves[move["pos"]["from"]]
+                        if move["pos"]["to"] in poss_moves_to:
+                            return move
+                except Exception:
+                    pass
+                self.terminal.specific_output(f"Move \'{usr_inp[1][0]}\' is not in possible moves!")
+            else:
+                if usr_inp[0] == "col":
+                    self.change_colors()
+                elif usr_inp[0] == "b":
+                    pass
+                self.terminal.board(self.get_data_at_move(game_data, move_index), player_id, self.colors, self.dimensions)
 
 
     ###################################################
     #  play ➔ manage_move ➔ get_move ➔ player_move  #
     ###################################################
+
+
+    # change colors
+    def change_colors(self):
+        pass
+
 
     # function return position in format (row, column) form format (letter(column), row(string))
     def get_pos(self, string):
@@ -250,7 +269,7 @@ class Game():
 
         return (row, column)
 
-    
+
     # tells us if given move is castling move
     def is_castling(self, board, move):
         
